@@ -17,13 +17,14 @@ export async function invoiceRoutes(fastify: FastifyInstance) {
     });
 
 
-    fastify.get('/', async (req, reply) => {
+    fastify.get<{ Querystring: InvoiceFilterParams }>('/', async (req, reply) => {
         const invoiceController = new InvoiceController();
         try {
-            const filterParams: InvoiceFilterParams | undefined = req.query.installation_id ?
-                { installationId: req.query.installation_id as string }
-                : undefined;
-            const invoices = await invoiceController.findAll(filterParams);
+            // const filterParams: InvoiceFilterParams | undefined = req.query.installationId ?
+            //     { installationId: req.query.installationId as string }
+            //     : undefined;
+            console.log('===> ', req.query);
+            const invoices = await invoiceController.findAll(req.query);
             reply.send(invoices);
         } catch (error) {
             reply.send(error);
@@ -32,10 +33,15 @@ export async function invoiceRoutes(fastify: FastifyInstance) {
 
 
     fastify.post<{ Body: { installationId: string, invoices: InvoiceCreate[] } }>('/create-many', async (req, reply) => {
+        const { installationId, invoices } = req.body;
+        if (!installationId || !invoices || invoices.length === 0) {
+            reply.status(400).send({ error: "Parâmetros 'installationId' e 'invoices' são necessários e 'invoices' não pode ser vazio." });
+            return;
+        }
         const invoiceController = new InvoiceController();
         try {
-            const invoices = await invoiceController.createMany(req.body.installationId, req.body.invoices);
-            reply.send(invoices);
+            const invoicesRes = await invoiceController.createMany(installationId, invoices);
+            reply.send(invoicesRes);
         } catch (error) {
             reply.send(error);
         }
@@ -45,7 +51,6 @@ export async function invoiceRoutes(fastify: FastifyInstance) {
     fastify.get<{ Params: { invoiceId: string } }>('/:invoiceId/download', async (req, reply) => {
         const invoiceController = new InvoiceController();
         try {
-            console.log('req.params.invoiceId ====================> ', req.params.invoiceId);
             const pdfBuffer = await invoiceController.downloadInvoicePdf(req.params.invoiceId);
             reply.header('Content-Type', 'application/pdf');
             reply.header('Content-Disposition', `attachment; filename=invoice-${req.params.invoiceId}.pdf`);

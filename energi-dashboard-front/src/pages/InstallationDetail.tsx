@@ -1,10 +1,14 @@
 import AppLayout from "@/components/AppLayout";
+import BackButton from "@/components/BackButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Installation } from "@/interfaces/installations";
 import { Invoice } from "@/interfaces/invoices";
 import api from "@/serve/api";
-import { Download, FileText, UserCog } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@radix-ui/react-hover-card";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@radix-ui/react-select";
+import { Calendar, Download, FileText, UserCog } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
@@ -27,7 +31,7 @@ export function InstallationDetail() {
             setInstallation(response.data)
         })
 
-        api.get(`/invoices?installation_id=${id}`).then((response) => {
+        api.get(`/invoices?installationId=${id}`).then((response) => {
             console.log(response.data)
             setInvoices(response.data)
         })
@@ -48,15 +52,45 @@ export function InstallationDetail() {
         })
     }
 
+
     return (
         <AppLayout>
-            <h1 className="text-4xl font-bold">Detalhes da instalação {installation.number}</h1>
+
+            <BackButton />
+
+            <header className="flex justify-between items-end mt-8 border-b py-4">
+                <div>
+                    <p className="text-xxs text-zinc-500">Nmero da instalação</p>
+                    <h1 className="text-6xl "> {installation.number}</h1>
+                </div>
+                <div className="gap-2 text-right cursor-pointer">
+                    <p className="text-xxs text-zinc-500">Referencia</p>
+                    <p className="text-xl font-light flex items-center gap-2">DEZ/2022 a MAR/2023
+                        <Calendar size={18} />
+                    </p>
+                </div>
+
+
+            </header>
 
 
             <section className="mt-10">
-                <h2 className="text-2xl border-b">Faturas</h2>
+                <h2 className="text-2xl">Faturas</h2>
 
-                <ul className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8 ">
+
+
+                <HoverCard>
+                    <HoverCardTrigger asChild>
+                        <Button variant="link">@nextjs</Button>
+                    </HoverCardTrigger>
+                    <HoverCardContent className="w-80">
+                        <div className="flex justify-between space-x-4">
+                            teste
+                        </div>
+                    </HoverCardContent>
+                </HoverCard>
+
+                <ul className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 ">
                     {
                         invoices.map((invoice) => (
                             <li key={invoice.id}>
@@ -78,7 +112,7 @@ export function InstallationDetail() {
                             </li>
                         ))
                     }
-                    
+
                 </ul>
             </section>
 

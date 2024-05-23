@@ -1,21 +1,29 @@
 export interface Invoice {
     id: string;
     installationId: string;
-    installNumber: number;
+    installNumber: string;
+    date: Date;
     consumeAmountInKwh: number;
     consumeUnitValue: number;
     consumeTotalValue: number;
     invoiceDateRef: string;
+    dateRef: Date;
     invoiceDueDate: string;
+    dueDate: Date;
     invoiceValue: number;
     publicTaxValue: number;
+    fullConsumedEnergy: number;
+    compensatedEnergy: number;
+    economyGD: number;
+    valueWithoutGD: number;
+    energyCompensated: number;
     createdAt: Date;
     updatedAt: Date;
 }
 
 export interface InvoiceCreate {
     installationId: string;
-    installNumber: number;
+    installNumber: string;
     consumeAmountInKwh: number;
     consumeUnitValue: number;
     consumeTotalValue: number;
@@ -23,10 +31,17 @@ export interface InvoiceCreate {
     invoiceDueDate: string;
     invoiceValue: number;
     publicTaxValue: number;
+    fullConsumedEnergy: number;
+    compensatedEnergy: number;
+    economyGD: number;
+    valueWithoutGD: number;
+    energyCompensated: number;
 }
 
 export interface InvoiceFilterParams {
-    installationId: string;
+    installationId?: string;
+    dateIni?: string;
+    dateEnd?: string;
 }
 
 export interface InvoiceRepository {
@@ -36,3 +51,4 @@ export interface InvoiceRepository {
     findById(invoiceId: string): Promise<Invoice | null>;
     // findByClientNumber(clientNumber: number): Promise<Invoice | null>;
 }
+

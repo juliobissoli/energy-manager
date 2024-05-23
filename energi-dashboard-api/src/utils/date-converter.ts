@@ -20,7 +20,18 @@ export const convertDateRef2SDate = (date: string): Date => {
     const idx = monthsMap[month.toUpperCase() || '--'];
 
     console.log('MONTH ==>', idx);
-    const monthNumber = idx + 1;
-    return new Date(`${year}-${monthNumber}-01`);
+    const monthNumber = idx;
+    console.log('Data ===> ', `${year}-${monthNumber}-01`);
+    const d = new Date(`${year}-${monthNumber}-01`);
+    return d;
 };
+
+
+export const convertDueDate = (date: string): Date => {
+    const [day, month, year] = date.split('/');
+    console.log('MONTH ==>', month);
+
+    return new Date(`${year}-${month}-${day}`);
+};
+
 

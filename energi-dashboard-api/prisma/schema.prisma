@@ -30,13 +30,21 @@ model Invoice {
   installationId     String
   installation       Installation @relation(fields: [installationId], references: [id])
   installNumber      String
-  consumeAmountInKwh Int
-  consumeUnitValue   Int
-  consumeTotalValue  Int
+  date               DateTime
+  consumeAmountInKwh Float
+  consumeUnitValue   Float
+  consumeTotalValue  Float
   invoiceDateRef     String
+  dateRef            DateTime
   invoiceDueDate     String
-  invoiceValue       Int
-  publicTaxValue     Int
+  dueDate            DateTime
+  invoiceValue       Float
+  publicTaxValue     Float
+  fullConsumedEnergy Float
+  compensatedEnergy  Float
+  economyGD          Float
+  valueWithoutGD     Float
+  energyCompensated  Float
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
 

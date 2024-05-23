@@ -21,7 +21,7 @@ export default function InstallationsList() {
 
     return (
         <AppLayout>
-            <h1 className="text-4xl py-2 border-b">Instalaçes</h1>
+            <h1 className="text-4xl py-2 border-b">Instalacoes</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
                 {installations.map((installation: Installation) => (
@@ -33,7 +33,7 @@ export default function InstallationsList() {
                                 </CardHeader>
                                 <CardContent>
                                     <p className="text-semibold text-2xl">{installation.number}</p>
-                                    <p className="text-zinc-500 mt-4 text-sm">Nome do cliente</p>
+                                    <p className="text-zinc-500 mt-4 text-sm">Titular</p>
                                     <p className="w-full  truncate">{installation.clientName}</p>
                                 </CardContent>
                             </Card>

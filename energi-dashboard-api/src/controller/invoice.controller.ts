@@ -45,6 +45,7 @@ class InvoiceController {
             throw new Error('Installation not found');
         }
 
+        console.log('invoices', invoices)
         const invoicesCreated = await this.invoiceRepository.createMany(
             invoices.map(invoice => ({ ...invoice, installationId: installationId }))
         );

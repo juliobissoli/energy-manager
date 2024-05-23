@@ -18,7 +18,7 @@ const readPdf = async (filePath) => {
         const lines = text.split('\n');
         for (let line of lines) {
             if (line.includes(keyword)) {
-                return line;
+                return line.trim()?.split(/\s+/) || [];;
             }
         }
         return null;
@@ -38,25 +38,43 @@ const readPdf = async (filePath) => {
 
     const extractInfo = (text) => {
 
-
+        // console.log('============= Texto ===> ', text);
         /**
          * Obtem informaçes referentes ao consumo de energia
          * como quantidade em kWh, valor da unidade e valor total
          */
-        const refEnergyConsumedLine = findLineWithKeyword('Energia ElétricakWh ', text);
-        const refEnergyConsumed = refEnergyConsumedLine.trim().split(/\s+/);
+        const refEnergyConsumed = findLineWithKeyword('Energia ElétricakWh ', text);
+        // const refEnergyConsumed = refEnergyConsumedLine.trim().split(/\s+/);
         const energyConsumed = {
-            consume_amount_in_kwh: refEnergyConsumed[2],
-            consume_unit_value: refEnergyConsumed[3],
-            consume_total_value: refEnergyConsumed[4],
+            consumeAmountInKwh: parseFloat(refEnergyConsumed[2]),
+            consumeUnitValue: parseFloat(refEnergyConsumed[3]),
+            consumeTotalValue: parseFloat(refEnergyConsumed[4]),
         }
+        const energyConsumedTotal = parseFloat(refEnergyConsumed[2]);
 
+        /**
+     * Obtem informaçes referentes ao consumo de energia
+     * como refEnergyConsSCEE em kWh, valor da unidade e valor total
+     */
+        const refEnergySCEE = findLineWithKeyword('Energia SCEE ISENTAkWh ', text);
+        // const refEnergySCEE = refEnergyConsSCEE?.trim()?.split(/\s+/) || [];
+        const energySCEE = refEnergySCEE ? parseFloat(refEnergySCEE[3]) : 0;
+
+        const fullConsumedEnergy = energySCEE + energyConsumedTotal;
+
+
+
+        const compensatedEnergyRef = findLineWithKeyword('Energia compensada GD IkWh ', text);
+        const compensatedEnergy = compensatedEnergyRef ? parseFloat(compensatedEnergyRef[4]) : 0;
+        const economyGD = compensatedEnergyRef ? parseFloat(compensatedEnergyRef[6]) : 0;
+        const valueWithoutGD = energyConsumedTotal - economyGD;
+        const energyCompensated = valueWithoutGD;
         /**
         * Obtem informaçes referentes ao taxa de iluminação publica
         */
-        const refPublicTaxConsumedLine = findLineWithKeyword('Contrib Ilum Publica Municipal', text);
-        const refPublicTaxConsumedTable = refPublicTaxConsumedLine.trim().split(/\s+/);
-        const publicTaxConsumed = refPublicTaxConsumedTable[4];
+        const refPublicTaxConsumedTable = findLineWithKeyword('Contrib Ilum Publica Municipal', text);
+        // const refPublicTaxConsumedTable = refPublicTaxConsumedLine.trim().split(/\s+/);
+        const publicTaxConsumed = refPublicTaxConsumedTable ? parseFloat(refPublicTaxConsumedTable[4]) : 0;
 
 
         /**
@@ -64,11 +82,11 @@ const readPdf = async (filePath) => {
          * nmero do cliente e nmero da instalação
         */
         const tableClientInfo = getTableByHeader('Nº DO CLIENTE', text, 2);
-        const clientInfo = tableClientInfo[1].trim().split(/\s+/);
+        const clientInfo = tableClientInfo ? tableClientInfo[1].trim().split(/\s+/) : [];
 
         const client = {
-            client_number: clientInfo[0],
-            client_instalation: clientInfo[1],
+            clientNumber: clientInfo[0],
+            installNumber: clientInfo[1],
         }
 
         /**
@@ -78,15 +96,39 @@ const readPdf = async (filePath) => {
         const tableToGenerate = getTableByHeader('Valor a pagar (R$)', text, 2);
         const invoiceInfo = tableToGenerate[1].trim().split(/\s+/);
         const invoice = {
-            invoice_date_ref: invoiceInfo[0],
-            invoice_due_date: invoiceInfo[1],
-            invoice_value: invoiceInfo[2],
+            invoiceDateRef: invoiceInfo[0],
+            invoiceDueDate: invoiceInfo[1],
+            invoiceValue: parseFloat(invoiceInfo[2]),
         }
+
+
+
+        // Obtem nome do cliente
+        let tableToClientName = getTableByHeader('Comprovante de Pagamento', text, 2);
+        let clientName = 'Client';
+
+        if (tableToClientName) {
+            clientName = tableToClientName[1];
+        } else {
+            tableToClientName = getTableByHeader('AUTOMÁTICO', text, 2);
+            if (tableToClientName) {
+                clientName = tableToClientName[1];
+            }
+        }
+
+
+
         return {
             ...energyConsumed,
             ...client,
             ...invoice,
-            public_tax_value: publicTaxConsumed,
+            publicTaxValue: publicTaxConsumed,
+            economyGD,
+            energyCompensated,
+            fullConsumedEnergy,
+            compensatedEnergy,
+            valueWithoutGD,
+            clientName
         };
     };
 
@@ -122,178 +164,77 @@ function listFilesInDirectory(directoryPath) {
 //     console.error(err);
 // });
 
-createInstallation = async (installationNumber, clientNumber) => {
-    let installationId = null;
-    await api.post('/installations', {
-        clientName: `Cliente ${clientNumber}-${installationNumber}`,
+createInstallation = async (installationNumber, clientNumber, clientName) => {
+    return await api.post('/installations', {
+        clientName,
+        clientNumber,
         number: installationNumber,
-        clientNumber: clientNumber
     }).then(
         res => {
-            installationId = res.data.id;
+            console.log('============= Instalação criada com sucesso ============= \n\n', res.data);
+            return res.data;
         },
         error => {
-            console.log('============= Erro ao criar instalação ============= \n\n', error.response);
+            console.log('============= Erro ao criar instalação ============= \n\n', error);
+            throw error;
         }
     )
-    return installationId;
+
 }
 
 handleInsertManyInvoices = async (installationNumber, list) => {
     let installationId = null;
     await api.get(`/installations/number/${installationNumber}`)
-    .then(
-        res => {
-            console.log('============= Instalação obtida com sucesso ============= \n\n', res.data);
-            installationId = res.data.id;
-        },
-        error => {
-            console.log('============= Erro ao obter instalação ============= \n\n', error);
-            installationId = createInstallation(installationNumber, list[0].client_number);
-        }
-    )
-  
-    
+        .then(
+            res => installationId = res.data.id,
+        )
+    if (!installationId) {
+        await createInstallation(installationNumber, list[0].clientNumber, list[0].clientName).then(
+            res => installationId = res.data.id
+        )
+    }
+
     console.log('============= Instalação ID ============= \n\n', installationId);
 
-    const data = list.map(invoice => ({
-        installationId: installationId,
-        installNumber: installationNumber,
-        consumeAmountInKwh: parseFloat(invoice.consume_amount_in_kwh),
-        consumeUnitValue: parseFloat(invoice.consume_unit_value),
-        consumeTotalValue: parseFloat(invoice.consume_total_value),
-        invoiceDateRef: invoice.invoice_date_ref,
-        invoiceDueDate: invoice.invoice_due_date,
-        invoiceValue: parseFloat(invoice.invoice_value),
-        publicTaxValue: parseFloat(invoice.public_tax_value)
-    }));
+    const data = list
 
-    await api.post('/invoices/create-many', {installationId, invoices: data}).then(
-        res => {
-            console.log('============= Faturas criadas com sucesso ============= \n\n', res.data);
-        },
-        error => {
-            console.log('============= Erro ao criar faturas ============= \n\n', error.response);
-        }
-    )
+    if (installationId) {
+        await api.post('/invoices/create-many', { installationId, invoices: data }).then(
+            res => {
+                console.log('============= Faturas criadas com sucesso ============= \n\n', res.data);
+            },
+            error => {
+                console.log('============= Erro ao criar faturas ============= \n\n', error.response);
+            }
+        )
+    }
+    else {
+        console.log('============= Instalação não encontrada ============= \n\n');
+    }
 }
 
 const handleSaves = async (data) => {
     console.log('============= Dados obtidos com sucesso =============');
 
     const installationMap = new Map();
-
-    data.forEach( invoice => {
-        if (installationMap.has(invoice.client_instalation)) {
-           const list = installationMap.get(invoice.client_instalation);
-           list.push(invoice);
-           installationMap.set(invoice.client_instalation, list);
+    data.forEach(invoice => {
+        if (installationMap.has(invoice.installNumber)) {
+            const list = installationMap.get(invoice.installNumber);
+            list.push(invoice);
+            installationMap.set(invoice.installNumber, list);
         } else {
-            installationMap.set(invoice.client_instalation, [invoice]);
+            installationMap.set(invoice.installNumber, [invoice]);
         }
     })
 
 
     installationMap.forEach(async (invoices, installationId) => {
         console.log(`Instalação ID: ${installationId}, Faturas: ${invoices.length}`);
-        
+
         handleInsertManyInvoices(installationId, invoices);
 
     });
-    return 
-    for (let invoice of data) {
-        let installationId;
-        if (!installationMap.get(invoice.client_instalation)) {
-            const url = `http://localhost:3000/installations/number/${invoice.client_instalation}`;
-            console.log('============= URL ============= \n\n', url);
-            const currentInstallation = await api.get(`/installations/number/${invoice.client_instalation}`).then(
-                res => {
-                    console.log('============= Instalação obtida com sucesso ============= \n\n', res.data);
-                },
-                error => {
-                    console.log('============= Erro ao obter instalação ============= \n\n', error);
-                }
-            )
-            // if (currentInstallation.data) {
-            //     installationId = currentInstallation.data.id;
-            //     installationMap.set(invoice.client_instalation, installationId);
-            // } else {
-            //     const newInstallation = await api.post('/installations', {
-            //         clientName: "Teste",
-            //         number: invoice.client_instalation,
-            //         clientNumber: invoice.client_number
-
-            //     });
-
-            //     if (newInstallation.data) {
-            //         installationId = newInstallation.data.id;
-            //         installationMap.set(invoice.client_instalation, installationId);
-            //     }
-            // } 
-            
-        }
-
-        // const newInvoice = await api.post(`/invoices`, {
-        //     installationId: installationId,
-        //     installNumber: invoice.client_instalation,
-        //     consumeAmountInKwh: invoice.consume_amount_in_kwh,
-        //     consumeUnitValue: invoice.consume_unit_value,
-        //     consumeTotalValue: invoice.consume_total_value,
-        //     invoiceDateRef: invoice.invoice_date_ref,
-        //     invoiceDueDate: invoice.invoice_due_date,
-        //     invoiceValue: invoice.invoice_value,
-        //     publicTaxValue: invoice.public_tax_value
-        // });
-
-        // if (newInvoice.data) {
-        //     console.log('============= Fatura criada com sucesso =============', newInvoice.data);
-        // }
-    }
-
-    // data.forEach(async invoice => {
-    //     let installationId;
-    //     if (!installationMap.get(invoice.client_instalation)) {
-
-    //         const currentInstallation = await api.get(`/installations/${invoice.client_instalation}`);
-
-    //         if (currentInstallation.data) {
-    //             installationId = currentInstallation.data.id;
-    //             installationMap.set(invoice.client_instalation, installationId);
-    //         } else {
-    //             const newInstallation = await api.post('/installations', {
-    //                 clientName: "Teste",
-    //                 number: invoice.client_instalation,
-    //                 clientNumber: invoice.client_number
-
-    //             });
-
-    //             if (newInstallation.data) {
-    //                 installationId = newInstallation.data.id;
-    //                 installationMap.set(invoice.client_instalation, installationId);
-    //             }
-    //         } 
-            
-    //     }
-
-    //     const newInvoice = await api.post(`/invoices`, {
-    //         installationId: installationId,
-    //         installNumber: invoice.client_instalation,
-    //         consumeAmountInKwh: invoice.consume_amount_in_kwh,
-    //         consumeUnitValue: invoice.consume_unit_value,
-    //         consumeTotalValue: invoice.consume_total_value,
-    //         invoiceDateRef: invoice.invoice_date_ref,
-    //         invoiceDueDate: invoice.invoice_due_date,
-    //         invoiceValue: invoice.invoice_value,
-    //         publicTaxValue: invoice.public_tax_value
-    //     });
-
-    //     if (newInvoice.data) {
-    //         console.log('============= Fatura criada com sucesso =============', newInvoice.data);
-    //     }
-
-    // });
-
-    console.log(installationMap);
+    return
 }
 
 
@@ -302,9 +243,9 @@ async function main() {
 
     try {
         const files = await listFilesInDirectory('./invoices');
-
+        // const files = ['3000055479-11-2023.pdf']
         console.log(files);
-        
+
         Promise.all(files.map(file => readPdf(`./invoices/${file}`))).then(
             res => {
                 console.log('============= Dados obtidos com sucesso =============')
