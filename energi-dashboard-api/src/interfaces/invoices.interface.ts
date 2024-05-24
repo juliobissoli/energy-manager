@@ -40,7 +40,7 @@ export interface InvoiceCreate {
 
 export interface InvoiceFilterParams {
     installationId?: string;
-    dateIni?: string;
+    dateInit?: string;
     dateEnd?: string;
 }
 

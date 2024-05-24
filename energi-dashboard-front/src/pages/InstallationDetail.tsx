@@ -1,19 +1,16 @@
 import AppLayout from "@/components/AppLayout";
 import BackButton from "@/components/BackButton";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { BtnFilterDate } from "@/components/common/BtnFilterDate";
+import { InvoiceCard } from "@/components/invoice/InvoiceCard";
 import { Installation } from "@/interfaces/installations";
-import { Invoice } from "@/interfaces/invoices";
-import api from "@/serve/api";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@radix-ui/react-hover-card";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@radix-ui/react-select";
-import { Calendar, Download, FileText, UserCog } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import api from "@/serve/api";
+import { Invoice } from "@/interfaces/invoices";
+import { useNavigate, useParams } from "react-router-dom";
+import ChartLine, { EntitiesToChartLine } from "@/components/common/ChartLine";
+import { TotalizerCard } from "@/components/common/TotalizerCard";
 
 export function InstallationDetail() {
-
     const [installation, setInstallation] = useState<Installation>({
         id: "",
         number: "",
@@ -26,31 +23,45 @@ export function InstallationDetail() {
     const [invoices, setInvoices] = useState<Invoice[]>([])
 
     const { id } = useParams<{ id: string }>();
+    const queryString = new URLSearchParams(window.location.search);
+    const dateInit = queryString.get('dateInit') || `${new Date().getFullYear() - 1}-01-01`;
+    const dateEnd = queryString.get('dateEnd') || `${new Date().getFullYear() - 1}-12-01`;
     useEffect(() => {
+
         api.get(`/installations/${id}`).then((response) => {
             setInstallation(response.data)
         })
 
-        api.get(`/invoices?installationId=${id}`).then((response) => {
-            console.log(response.data)
+        const url = `/invoices?installationId=${id}&dateInit=${dateInit}&dateEnd=${dateEnd}`
+
+        api.get(url).then((response) => {
             setInvoices(response.data)
         })
-    }, [id])
+    }, [id, dateInit, dateEnd])
 
 
-
-    function downloadInvoice(invoiceId: string) {
-        console.log("download")
-        api.get(`/invoices/${invoiceId}/download`, { responseType: 'blob' }).then((response) => {
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `fatura-${invoiceId}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            link?.parentNode?.removeChild(link);
-        })
+    const navigate = useNavigate();
+    function handleFilterDate(data: { dataInit: Date, dateEnd: Date }) {
+        const newDateInit = data.dataInit.toISOString().split('T')[0];
+        const newDateEnd = data.dateEnd.toISOString().split('T')[0];
+        navigate(`/installations/${id}?dateInit=${newDateInit}&dateEnd=${newDateEnd}`);
     }
+
+
+    const entitiesConsume: EntitiesToChartLine[] = [
+        { name: 'consumeAmountInKwh', label: 'Consumo em KwH', color: '#84cc16' },
+        { name: 'fullConsumedEnergy', label: 'Energia total consumida', color: '#3b82f6' },
+        { name: 'economyGD', label: 'Economia com GD', color: '#ef4444' },
+        { name: 'compensatedEnergy', label: 'Energia compensada', color: '#cccccc' },
+    ]
+
+
+    const entitiesPayment: EntitiesToChartLine[] = [
+        { name: 'invoiceValue', label: 'Valor da fatura', color: '#84cc16' },
+        { name: 'publicTaxValue', label: 'Valor da taxa pblica', color: '#3b82f6' },
+        { name: 'valueWithoutGD', label: 'Valor sem GD', color: '#ef4444' },
+    ]
+
 
 
     return (
@@ -58,57 +69,37 @@ export function InstallationDetail() {
 
             <BackButton />
 
-            <header className="flex justify-between items-end mt-8 border-b py-4">
+            <header className="flex flex-col md:flex-row justify-between md:items-end mt-8 border-b py-4">
                 <div>
                     <p className="text-xxs text-zinc-500">Nmero da instalação</p>
-                    <h1 className="text-6xl "> {installation.number}</h1>
+                    <p className="md:text-6xl text-5xl"> {installation.number}</p>
                 </div>
-                <div className="gap-2 text-right cursor-pointer">
-                    <p className="text-xxs text-zinc-500">Referencia</p>
-                    <p className="text-xl font-light flex items-center gap-2">DEZ/2022 a MAR/2023
-                        <Calendar size={18} />
-                    </p>
-                </div>
-
+                <BtnFilterDate dataInit={dateInit} dateEnd={dateEnd} functionApply={handleFilterDate} />
 
             </header>
 
+            <section className="mt-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                    <TotalizerCard data={invoices} prefix="kwh" title="Gasto energético total" entity="consumeAmountInKwh" />
+                    <TotalizerCard data={invoices} prefix="kwh" title="Economia de energia total" entity="economyGD" />
+                    <TotalizerCard data={invoices} prefix="R$" title="Valor da fatura total" entity="invoiceValue" />
+                    <TotalizerCard data={invoices} prefix="R$" title="Valor total do consumo" entity="consumeTotalValue" />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+                    <ChartLine data={invoices} title="Gasto energético" entities={entitiesConsume} />
+                    <ChartLine data={invoices} title="Valores pagos" entities={entitiesPayment} />
+                </div>
+            </section>
 
             <section className="mt-10">
                 <h2 className="text-2xl">Faturas</h2>
-
-
-
-                <HoverCard>
-                    <HoverCardTrigger asChild>
-                        <Button variant="link">@nextjs</Button>
-                    </HoverCardTrigger>
-                    <HoverCardContent className="w-80">
-                        <div className="flex justify-between space-x-4">
-                            teste
-                        </div>
-                    </HoverCardContent>
-                </HoverCard>
 
                 <ul className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 ">
                     {
                         invoices.map((invoice) => (
                             <li key={invoice.id}>
-                                <Card className="">
-                                    <CardHeader>
-                                        <FileText size={32} />
-                                    </CardHeader>
-                                    <CardContent className="space-y-2">
-                                        <p className="text-semibold text-2xl">{invoice.invoiceDateRef}</p>
-                                        <p className="text-zinc-500 mt-4 text-sm">Venc.:{invoice.invoiceDueDate}</p>
-                                        <p className="w-full  truncate">Valor R${invoice.consumeTotalValue}</p>
-                                    </CardContent>
-                                    <CardFooter className="flex justify-end">
-                                        <Button onClick={() => downloadInvoice(invoice.id)} variant={"outline"} size={"icon"}>
-                                            <Download size={14} />
-                                        </Button>
-                                    </CardFooter>
-                                </Card>
+                                <InvoiceCard invoice={invoice} />
                             </li>
                         ))
                     }

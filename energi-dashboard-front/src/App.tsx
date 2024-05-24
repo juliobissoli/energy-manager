@@ -17,6 +17,7 @@ import {
 } from 'chart.js';
 import InstallationsList from './pages/InstallationsList';
 import { InstallationDetail } from './pages/InstallationDetail';
+import Invoices from './pages/Invoives';
 
 
 ChartJS.register(
@@ -59,6 +60,10 @@ function App() {
     {
       path: "/installations/:id",
       element: <InstallationDetail />,
+    },
+    {
+      path: "/invoices",
+      element: <Invoices />,
     }
 
 

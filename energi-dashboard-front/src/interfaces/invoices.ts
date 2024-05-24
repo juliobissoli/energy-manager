@@ -1,7 +1,7 @@
 export interface Invoice {
     id: string;
     installationId: string;
-    installNumber: number;
+    installNumber: string;
     consumeAmountInKwh: number;
     consumeUnitValue: number;
     consumeTotalValue: number;
@@ -9,6 +9,11 @@ export interface Invoice {
     invoiceDueDate: string;
     invoiceValue: number;
     publicTaxValue: number;
+    fullConsumedEnergy: number;
+    compensatedEnergy: number;
+    economyGD: number;
+    valueWithoutGD: number;
+    energyCompensated: number;
     createdAt: Date;
     updatedAt: Date;
 }

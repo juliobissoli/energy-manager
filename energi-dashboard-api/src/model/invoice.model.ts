@@ -43,8 +43,14 @@ class InvoiceModel implements InvoiceRepository {
 
         if (filterParams) {
             if (filterParams?.installationId) where.installationId = filterParams.installationId
-            if (filterParams?.dateIni) where.dateRef = { gte: new Date(filterParams.dateIni) }
+            if (filterParams?.dateInit) where.dateRef = { gte: new Date(filterParams.dateInit) }
             if (filterParams?.dateEnd) where.dateRef = { lte: new Date(filterParams.dateEnd) }
+            if (filterParams?.dateInit && filterParams?.dateEnd) {
+                where.dateRef = {
+                    gte: new Date(filterParams.dateInit),
+                    lte: new Date(filterParams.dateEnd)
+                }
+            }
 
         }
 

@@ -11,7 +11,6 @@ export default function InstallationsList() {
     useEffect(() => {
         api.get('/installations')
             .then(response => {
-                console.log(response)
                 setInstallations(response.data)
             })
     }, [])
