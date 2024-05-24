@@ -1,12 +1,12 @@
 import { FastifyInstance } from "fastify";
 import { InstallationCreate } from "../interfaces/installation.interface";
-import InstallationController from "../controller/installation.cintroller";
+import InstallationController from "../controller/installation/installation.cintroller";
 
 export async function installationRoutes(fastify: FastifyInstance) {
-    fastify.post<{Body: InstallationCreate}>('/', async (req, reply) => {
+    fastify.post<{ Body: InstallationCreate }>('/', async (req, reply) => {
         const installationController = new InstallationController();
         try {
-            
+
             const installation = await installationController.create(req.body);
 
             reply.status(201).send(installation);
@@ -17,11 +17,10 @@ export async function installationRoutes(fastify: FastifyInstance) {
 
 
 
-    fastify.get('/:id', async (req, reply) => {
+    fastify.get<{ Params: { id: string } }>('/:id', async (req, reply) => {
         const installationController = new InstallationController();
-        const id = req.params.id as string;
+        const { id } = req.params;
         try {
-            console.log('============= ID ============= \n\n', id);
             const installation = await installationController.findById(id);
             if (!installation) {
                 reply.status(404).send({ message: 'Instalação não encontrada' });
@@ -29,16 +28,14 @@ export async function installationRoutes(fastify: FastifyInstance) {
                 reply.send(installation);
             }
         } catch (error) {
-            console.log('============= ERRO ============= \n\n', error);
             reply.status(500).send(error);
         }
     });
 
-    fastify.get('/number/:number', async (req, reply) => {
+    fastify.get<{ Params: { number: string } }>('/number/:number', async (req, reply) => {
         const installationController = new InstallationController();
-        const number = req.params.number as string;
+        const { number } = req.params;
         try {
-            console.log('============= NUMBER ============= \n\n', number);
             const installation = await installationController.findByInstallationNumber(number);
             if (!installation) {
                 reply.status(404).send({ message: 'Instalação não encontrada' });
@@ -46,7 +43,6 @@ export async function installationRoutes(fastify: FastifyInstance) {
                 reply.send(installation);
             }
         } catch (error) {
-            console.log('============= ERRO ============= \n\n', error);
             reply.status(500).send(error);
         }
     });

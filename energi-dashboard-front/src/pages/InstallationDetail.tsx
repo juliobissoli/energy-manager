@@ -9,6 +9,7 @@ import { Invoice } from "@/interfaces/invoices";
 import { useNavigate, useParams } from "react-router-dom";
 import ChartLine, { EntitiesToChartLine } from "@/components/common/ChartLine";
 import { TotalizerCard } from "@/components/common/TotalizerCard";
+import { useToast } from "@/components/ui/use-toast";
 
 export function InstallationDetail() {
     const [installation, setInstallation] = useState<Installation>({
@@ -21,6 +22,7 @@ export function InstallationDetail() {
     })
 
     const [invoices, setInvoices] = useState<Invoice[]>([])
+    const { toast } = useToast()
 
     const { id } = useParams<{ id: string }>();
     const queryString = new URLSearchParams(window.location.search);
@@ -30,14 +32,26 @@ export function InstallationDetail() {
 
         api.get(`/installations/${id}`).then((response) => {
             setInstallation(response.data)
+        }).catch((error) => {
+            showError(error)
         })
 
         const url = `/invoices?installationId=${id}&dateInit=${dateInit}&dateEnd=${dateEnd}`
 
         api.get(url).then((response) => {
             setInvoices(response.data)
+        }).catch((error) => {
+            showError(error)
         })
     }, [id, dateInit, dateEnd])
+
+    const showError = (error: any) => {
+        toast({
+            title: "Erro ao buscar as faturas",
+            description: error.message,
+            variant: "destructive",
+        })
+    }
 
 
     const navigate = useNavigate();

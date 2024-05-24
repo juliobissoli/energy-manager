@@ -38,7 +38,7 @@ export function InvoiceCard({ invoice }: { invoice: Invoice }) {
             </CardHeader>
             <CardContent className="space-y-2">
                 <p className="text-semibold text-2xl">{invoice.invoiceDateRef}</p>
-                <p className="text-zinc-500 mt-4 text-sm">Venc.:{invoice.invoiceDueDate}</p>
+                <p className="text-zinc-500 mt-4 text-sm">Venc. {invoice.invoiceDueDate}</p>
                 <p className="w-full  truncate">Valor R${invoice.consumeTotalValue}</p>
             </CardContent>
             <CardFooter className="flex justify-end">

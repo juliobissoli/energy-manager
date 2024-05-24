@@ -18,6 +18,7 @@ import {
 import InstallationsList from './pages/InstallationsList';
 import { InstallationDetail } from './pages/InstallationDetail';
 import Invoices from './pages/Invoives';
+import { Toaster } from './components/ui/toaster';
 
 
 ChartJS.register(
@@ -73,6 +74,8 @@ function App() {
     <>
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <RouterProvider router={router} />
+        <Toaster />
+
       </ThemeProvider>
     </>
   )

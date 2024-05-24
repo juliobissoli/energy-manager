@@ -3,6 +3,7 @@ import { BtnFilterDate } from "@/components/common/BtnFilterDate";
 import ChartLine, { EntitiesToChartLine } from "@/components/common/ChartLine";
 import { TotalizerCard } from "@/components/common/TotalizerCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useToast } from "@/components/ui/use-toast";
 import { Invoice } from "@/interfaces/invoices";
 import api from "@/serve/api"
 import { useEffect, useState } from "react"
@@ -20,9 +21,17 @@ export default function Dashboard() {
 
     const [invoices, setInvoices] = useState<Array<Invoice>>([])
 
+    const { toast } = useToast()
     useEffect(() => {
         api.get(`/invoices?dateInit=${dateInit}&dateEnd=${dateEnd}`).then((response) => {
             setInvoices(response.data)
+        }
+        ).catch((error) => {
+            toast({
+                title: "Erro ao buscar as faturas",
+                description: error.message,
+                variant: "destructive",
+            })
         })
 
     }, [dateInit, dateEnd])

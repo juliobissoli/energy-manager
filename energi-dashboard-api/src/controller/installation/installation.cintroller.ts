@@ -1,6 +1,6 @@
 import { Installation, Invoice } from "@prisma/client";
-import { InstallationCreate, InstallationRepository } from "../interfaces/installation.interface";
-import { InstallationModel } from "../model/insttalation.model";
+import { InstallationCreate, InstallationRepository } from "../../interfaces/installation.interface";
+import { InstallationModel } from "../../model/insttalation.model";
 
 class InstallationController {
     private installationRepository: InstallationRepository;

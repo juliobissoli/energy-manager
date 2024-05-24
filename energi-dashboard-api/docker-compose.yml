@@ -1,0 +1,10 @@
+version: "3"
+services:
+  postgresql:
+    image: postgres:alpine
+    environment:
+      POSTGRES_DB: energy-manager
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"

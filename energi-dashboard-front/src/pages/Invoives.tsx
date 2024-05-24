@@ -1,6 +1,7 @@
 import AppLayout from "@/components/AppLayout"
 import { BtnFilterDate } from "@/components/common/BtnFilterDate"
 import { InvoiceCard } from "@/components/invoice/InvoiceCard"
+import { useToast } from "@/components/ui/use-toast"
 import { Invoice } from "@/interfaces/invoices"
 import api from "@/serve/api"
 import { useEffect, useState } from "react"
@@ -14,6 +15,7 @@ export default function Invoices() {
     const dateInit = queryString.get('dateInit') || `${new Date().getFullYear() - 1}-01-01`;
     const dateEnd = queryString.get('dateEnd') || `${new Date().getFullYear() - 1}-12-01`;
 
+    const { toast } = useToast()
 
     useEffect(() => {
 
@@ -21,9 +23,20 @@ export default function Invoices() {
 
         api.get(url).then((response) => {
             setInvoices(response.data)
+        }).catch((error) => {
+            showError(error)
         })
     }, [dateInit, dateEnd])
 
+
+    const showError = (error: any) => {
+        toast({
+            title: "Erro ao buscar as faturas",
+            description: error.message,
+            variant: "destructive",
+        })
+    }
+    
     const navigate = useNavigate();
     function handleFilterDate(data: { dataInit: Date, dateEnd: Date }) {
         const newDateInit = data.dataInit.toISOString().split('T')[0];

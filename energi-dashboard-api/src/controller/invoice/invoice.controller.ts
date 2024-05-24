@@ -1,10 +1,10 @@
 import { Invoice } from "@prisma/client";
-import { InvoiceCreate, InvoiceFilterParams, InvoiceRepository } from "../interfaces/invoices.interface";
-import { InvoiceModel } from "../model/invoice.model";
+import { InvoiceCreate, InvoiceFilterParams, InvoiceRepository } from "../../interfaces/invoices.interface";
+import { InvoiceModel } from "../../model/invoice.model";
 import { createReadStream } from 'fs';
 import { join } from 'path';
-import { InstallationModel } from "../model/insttalation.model";
-import { convertDateRef2SDate } from "../utils/date-converter";
+import { InstallationModel } from "../../model/insttalation.model";
+import { convertDateRef2SDate } from "../../utils/date-converter";
 import moment from "moment";
 
 
@@ -62,7 +62,7 @@ class InvoiceController {
         const dateRef = convertDateRef2SDate(invoice.invoiceDateRef);
         console.log(dateRef)
 
-        const filePath = join(__dirname, '../../invoices', `${invoice.installNumber}-${moment(dateRef).format('MM-YYYY')}.pdf`);
+        const filePath = join(__dirname, '../../../invoices', `${invoice.installNumber}-${moment(dateRef).format('MM-YYYY')}.pdf`);
 
         console.log('filePath =+=>>> ', filePath);
         const stream = createReadStream(filePath);

@@ -8,9 +8,11 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// provider = "postgresql"
+// url      = env("DATABASE_URL")
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = "postgresql://root:root@localhost:5432/energy-manager"
 }
 
 model Installation {

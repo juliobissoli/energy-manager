@@ -38,13 +38,7 @@ const readPdf = async (filePath) => {
 
     const extractInfo = (text) => {
 
-        // console.log('============= Texto ===> ', text);
-        /**
-         * Obtem informaçes referentes ao consumo de energia
-         * como quantidade em kWh, valor da unidade e valor total
-         */
         const refEnergyConsumed = findLineWithKeyword('Energia ElétricakWh ', text);
-        // const refEnergyConsumed = refEnergyConsumedLine.trim().split(/\s+/);
         const energyConsumed = {
             consumeAmountInKwh: parseFloat(refEnergyConsumed[2]),
             consumeUnitValue: parseFloat(refEnergyConsumed[3]),
@@ -52,12 +46,8 @@ const readPdf = async (filePath) => {
         }
         const energyConsumedTotal = parseFloat(refEnergyConsumed[2]);
 
-        /**
-     * Obtem informaçes referentes ao consumo de energia
-     * como refEnergyConsSCEE em kWh, valor da unidade e valor total
-     */
+
         const refEnergySCEE = findLineWithKeyword('Energia SCEE ISENTAkWh ', text);
-        // const refEnergySCEE = refEnergyConsSCEE?.trim()?.split(/\s+/) || [];
         const energySCEE = refEnergySCEE ? parseFloat(refEnergySCEE[3]) : 0;
 
         const fullConsumedEnergy = energySCEE + energyConsumedTotal;
@@ -69,18 +59,12 @@ const readPdf = async (filePath) => {
         const economyGD = compensatedEnergyRef ? parseFloat(compensatedEnergyRef[6]) : 0;
         const valueWithoutGD = energyConsumedTotal - economyGD;
         const energyCompensated = valueWithoutGD;
-        /**
-        * Obtem informaçes referentes ao taxa de iluminação publica
-        */
+
         const refPublicTaxConsumedTable = findLineWithKeyword('Contrib Ilum Publica Municipal', text);
-        // const refPublicTaxConsumedTable = refPublicTaxConsumedLine.trim().split(/\s+/);
         const publicTaxConsumed = refPublicTaxConsumedTable ? parseFloat(refPublicTaxConsumedTable[4]) : 0;
 
 
-        /**
-         * Obtem informaçes referentes ao cliente como
-         * nmero do cliente e nmero da instalação
-        */
+
         const tableClientInfo = getTableByHeader('Nº DO CLIENTE', text, 2);
         const clientInfo = tableClientInfo ? tableClientInfo[1].trim().split(/\s+/) : [];
 
@@ -89,10 +73,7 @@ const readPdf = async (filePath) => {
             installNumber: clientInfo[1],
         }
 
-        /**
-         * Obtem informaçes referentes a fatura como
-         * data de referência, data de vencimento e valor da fatura
-        */
+
         const tableToGenerate = getTableByHeader('Valor a pagar (R$)', text, 2);
         const invoiceInfo = tableToGenerate[1].trim().split(/\s+/);
         const invoice = {
@@ -157,59 +138,45 @@ function listFilesInDirectory(directoryPath) {
     });
 }
 
-// // Exemplo de uso da função listFilesInDirectory
-// listFilesInDirectory('./invoices').then(files => {
-//     console.log('Arquivos no diretório /invoices:', files);
-// }).catch(err => {
-//     console.error(err);
-// });
 
-createInstallation = async (installationNumber, clientNumber, clientName) => {
-    return await api.post('/installations', {
-        clientName,
-        clientNumber,
-        number: installationNumber,
-    }).then(
-        res => {
-            console.log('============= Instalação criada com sucesso ============= \n\n', res.data);
-            return res.data;
-        },
-        error => {
-            console.log('============= Erro ao criar instalação ============= \n\n', error);
-            throw error;
-        }
-    )
-
-}
 
 handleInsertManyInvoices = async (installationNumber, list) => {
     let installationId = null;
-    await api.get(`/installations/number/${installationNumber}`)
-        .then(
-            res => installationId = res.data.id,
-        )
-    if (!installationId) {
-        await createInstallation(installationNumber, list[0].clientNumber, list[0].clientName).then(
-            res => installationId = res.data.id
-        )
+    try {
+        const res = await api.get(`/installations/number/${installationNumber}`)
+        console.log('Installation found ==> ', res.data.id);
+        if (res.status === 200) {
+            installationId = res.data.id
+        }
+    } catch (error) {
+        console.log('Instalation not found, creating...');
+        const res = await api.post(`/installations`,
+        {
+            clientName: list[0].clientName,
+            clientNumber: list[0].clientNumber,
+            number: installationNumber
+        })
+        if (res.status === 201) {
+            console.log('Installation created with success ==> ', res.data.id);
+            installationId = res.data.id
+        }
     }
 
-    console.log('============= Instalação ID ============= \n\n', installationId);
-
+    console.log('Installation ID: ', installationId);
     const data = list
-
     if (installationId) {
-        await api.post('/invoices/create-many', { installationId, invoices: data }).then(
-            res => {
-                console.log('============= Faturas criadas com sucesso ============= \n\n', res.data);
-            },
-            error => {
-                console.log('============= Erro ao criar faturas ============= \n\n', error.response);
-            }
-        )
+        console.log('Creating invoices...');
+        const resCreateMany = await api.post('/invoices/create-many', { installationId, invoices: data })
+        if (resCreateMany.status === 201 || resCreateMany.status === 200) {
+            console.log('Invoices created with success');
+        }
+        else {
+            console.log('============= Error to create invoices ============= \n');
+            console.log(resCreateMany.response);
+        }
     }
     else {
-        console.log('============= Instalação não encontrada ============= \n\n');
+        console.log('Invoices to ', installationNumber, ' not created, installation not found');
     }
 }
 

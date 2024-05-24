@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { InvoiceCreate, InvoiceFilterParams } from "../interfaces/invoices.interface";
-import InvoiceController from "../controller/invoice.controller";
+import InvoiceController from "../controller/invoice/invoice.controller";
 
 
 export async function invoiceRoutes(fastify: FastifyInstance) {
