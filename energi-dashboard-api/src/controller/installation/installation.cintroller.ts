@@ -3,7 +3,7 @@ import { InstallationCreate, InstallationRepository } from "../../interfaces/ins
 import { InstallationModel } from "../../model/insttalation.model";
 
 class InstallationController {
-    private installationRepository: InstallationRepository;
+    public installationRepository: InstallationRepository;
     constructor() {
         this.installationRepository = new InstallationModel();
     }

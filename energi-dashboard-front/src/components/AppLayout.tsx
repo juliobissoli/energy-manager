@@ -8,7 +8,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
     const { pathname } = useLocation();
     const routers = [
         { name: "Dashboard", path: "/", icon: <Rocket size={14} /> },
-        { name: "Instalaçes", path: "/installations", icon: <SquareActivity size={14} /> },
+        { name: "Instalações", path: "/installations", icon: <SquareActivity size={14} /> },
         { name: "Faturas", path: "/invoices", icon: <FileText size={14} /> },
     ]
     return (

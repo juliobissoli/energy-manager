@@ -6,6 +6,8 @@ describe('InstallationController', () => {
     let installationController: InstallationController;
     let mockInstallationModel: Partial<InstallationModel>;
 
+    
+
     beforeEach(() => {
         mockInstallationModel = {
             create: jest.fn().mockResolvedValue({
@@ -17,7 +19,9 @@ describe('InstallationController', () => {
             findByInstallationNumber: jest.fn().mockResolvedValue(null)
         };
 
-        installationController = new InstallationController(mockInstallationModel as InstallationModel);
+        installationController = new InstallationController();
+        installationController.installationRepository = mockInstallationModel as InstallationModel;
+
     });
 
     describe('create', () => {

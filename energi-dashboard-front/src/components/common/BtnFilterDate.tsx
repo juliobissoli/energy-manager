@@ -48,7 +48,7 @@ export function BtnFilterDate({ dataInit, dateEnd, functionApply }: BtnFilterDat
         <Sheet>
             <SheetTrigger asChild>
                 <div className="gap-2 text-right cursor-pointer hover:bg-foreground/10 p-2 rounded-md">
-                    <p className="text-xxs text-zinc-500">Referencia</p>
+                    <p className="text-xxs text-zinc-500">Referência</p>
                     <p className="text-xl font-light flex justify-end items-center gap-2 ">
                         <span className="uppercase">{months[initMonth]}/{initYear}</span>
                         a

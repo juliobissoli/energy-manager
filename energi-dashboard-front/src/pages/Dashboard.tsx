@@ -68,7 +68,7 @@ export default function Dashboard() {
 
             </header>
 
-            <p className="text-zinc-500">Aqui estao apresentado os dadas intalacoes referente ao periodo selecionado</p>
+            <p className="text-zinc-500 py-2">Aqui estão os dados agrupados de todas as instalações</p>
 
             <section className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">

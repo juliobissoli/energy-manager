@@ -72,7 +72,7 @@ export function InstallationDetail() {
 
     const entitiesPayment: EntitiesToChartLine[] = [
         { name: 'invoiceValue', label: 'Valor da fatura', color: '#84cc16' },
-        { name: 'publicTaxValue', label: 'Valor da taxa pblica', color: '#3b82f6' },
+        { name: 'publicTaxValue', label: 'Valor da taxa pública', color: '#3b82f6' },
         { name: 'valueWithoutGD', label: 'Valor sem GD', color: '#ef4444' },
     ]
 
@@ -85,7 +85,7 @@ export function InstallationDetail() {
 
             <header className="flex flex-col md:flex-row justify-between md:items-end mt-8 border-b py-4">
                 <div>
-                    <p className="text-xxs text-zinc-500">Nmero da instalação</p>
+                    <p className="text-xxs text-zinc-500">Número da instalação</p>
                     <p className="md:text-6xl text-5xl"> {installation.number}</p>
                 </div>
                 <BtnFilterDate dataInit={dateInit} dateEnd={dateEnd} functionApply={handleFilterDate} />
