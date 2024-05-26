@@ -1,7 +1,6 @@
 import Fastify, { FastifyInstance } from "fastify"
 import cors from '@fastify/cors'
 
-import { clientRoutes } from "./routes/client.routes"
 import { invoiceRoutes } from "./routes/invoice.routes"
 import { installationRoutes } from "./routes/installation.routes"
 
@@ -12,6 +11,24 @@ const app: FastifyInstance = Fastify({
 
 app.register(cors, {
     origin: "*"
+})
+
+app.register(require('@fastify/swagger'))
+
+app.register(require('@fastify/swagger-ui'), {
+  routePrefix: '/docs',
+  uiConfig: {
+    docExpansion: 'full',
+    deepLinking: false
+  },
+  uiHooks: {
+    onRequest: function (request, reply, next) { next() },
+    preHandler: function (request, reply, next) { next() }
+  },
+  staticCSP: true,
+  transformStaticCSP: (header) => header,
+  transformSpecification: (swaggerObject, request, reply) => { return swaggerObject },
+  transformSpecificationClone: true
 })
 
 
