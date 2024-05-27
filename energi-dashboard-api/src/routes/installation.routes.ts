@@ -1,9 +1,11 @@
 import { FastifyInstance } from "fastify";
-import { InstallationCreate } from "../interfaces/installation.interface";
+import { createInstallationDocs, InstallationCreate } from "../interfaces/installation.interface";
 import InstallationController from "../controller/installation/installation.cintroller";
 
+
 export async function installationRoutes(fastify: FastifyInstance) {
-    fastify.post<{ Body: InstallationCreate }>('/', async (req, reply) => {
+
+    fastify.post<{ Body: InstallationCreate }>('/', createInstallationDocs, async (req, reply) => {
         const installationController = new InstallationController();
         try {
 

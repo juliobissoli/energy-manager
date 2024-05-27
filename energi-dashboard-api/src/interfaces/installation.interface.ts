@@ -13,6 +13,22 @@ export interface InstallationCreate {
     clientNumber?: string;
 }
 
+export const createInstallationDocs = {
+    schema: {
+        description: 'Get installation by ID',
+        tags: ['installation'],
+        params: {
+            type: 'object',
+            properties: {
+                number: { type: 'string' },
+                clientName: { type: 'string' },
+                clientNumber: { type: 'string' }
+            },
+            required: ['number']
+        }
+    }
+};
+
 
 export interface InstallationRepository {
     create(client: InstallationCreate): Promise<Installation>;
