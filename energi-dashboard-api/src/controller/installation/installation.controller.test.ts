@@ -1,12 +1,12 @@
 import { InstallationModel } from '../../model/insttalation.model';
 import { InstallationCreate } from '../../interfaces/installation.interface';
-import InstallationController from './installation.cintroller';
+import InstallationController from './installation.controller';
 
 describe('InstallationController', () => {
     let installationController: InstallationController;
     let mockInstallationModel: Partial<InstallationModel>;
 
-    
+
 
     beforeEach(() => {
         mockInstallationModel = {
@@ -59,5 +59,31 @@ describe('InstallationController', () => {
 
             await expect(installationController.create(installationData)).rejects.toThrow('Installation already exists');
         });
+
+        it('deve retornar todas as instalações existentes', async () => {
+            const mockInstallations = [
+                {
+                    id: '1',
+                    clientName: 'Cliente Teste 1',
+                    number: '12345',
+                    clientNumber: '67890'
+                },
+                {
+                    id: '2',
+                    clientName: 'Cliente Teste 2',
+                    number: '54321',
+                    clientNumber: '09876'
+                }
+            ];
+
+            mockInstallationModel.findAll = jest.fn().mockResolvedValue(mockInstallations);
+
+            const result = await installationController.findAll();
+
+            expect(mockInstallationModel.findAll).toHaveBeenCalled();
+            expect(result).toEqual(mockInstallations);
+        });
     });
+
+    
 });

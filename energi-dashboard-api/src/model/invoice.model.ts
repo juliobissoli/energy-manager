@@ -25,7 +25,6 @@ class InvoiceModel implements InvoiceRepository {
             dueDate: convertDueDate(invoice.invoiceDueDate),
         }
 
-        console.log(data);
         return data;
     }
 
@@ -39,22 +38,24 @@ class InvoiceModel implements InvoiceRepository {
     async findAll(filterParams?: InvoiceFilterParams): Promise<Invoice[]> {
         const where: any = {}
 
-        console.log('===> ', filterParams?.installationId);
-
         if (filterParams) {
             if (filterParams?.installationId) where.installationId = filterParams.installationId
-            if (filterParams?.dateInit) where.dateRef = { gte: new Date(filterParams.dateInit) }
-            if (filterParams?.dateEnd) where.dateRef = { lte: new Date(filterParams.dateEnd) }
-            if (filterParams?.dateInit && filterParams?.dateEnd) {
-                where.dateRef = {
-                    gte: new Date(filterParams.dateInit),
-                    lte: new Date(filterParams.dateEnd)
-                }
+            if (filterParams?.dateInit && !isNaN(new Date(filterParams.dateInit).getTime())) {
+                where.dateRef = { gte: new Date(filterParams.dateInit) }
             }
+            if (filterParams?.dateEnd && !isNaN(new Date(filterParams.dateEnd).getTime())) {
+                where.dateRef = { ...where.dateRef, lte: new Date(filterParams.dateEnd) }
+            }
+            // if (filterParams?.dateInit && filterParams?.dateEnd && !isNaN(new Date(filterParams.dateInit).getTime())
+            //     && !isNaN(new Date(filterParams.dateEnd).getTime())) {
+            //     where.dateRef = {
+            //         gte: new Date(filterParams.dateInit),
+            //         lte: new Date(filterParams.dateEnd)
+            //     }
+            // }
 
         }
 
-        console.log('===> ', where);
         const invoices = await prisma.invoice.findMany(
             { where }
         );
@@ -78,7 +79,6 @@ class InvoiceModel implements InvoiceRepository {
             });
             return invoicesCreated ? 'Invoices created' : 'Error';
         } catch (error) {
-            console.log('============= Erro ao criar faturas ============= \n\n', error);
             return 'Error';
         }
     }

@@ -4,11 +4,15 @@ import { Button } from "../ui/button";
 import api from "@/serve/api";
 import { Invoice } from "@/interfaces/invoices";
 import { useState } from "react";
+import { useToast } from "../ui/use-toast";
 
 
 export function InvoiceCard({ invoice }: { invoice: Invoice }) {
 
     const [isLoading, setIsLoading] = useState(false);
+
+    const { toast } = useToast()
+
 
     async function downloadInvoice() {
 
@@ -24,8 +28,12 @@ export function InvoiceCard({ invoice }: { invoice: Invoice }) {
             link?.parentNode?.removeChild(link);
         },
             (error) => {
-                console.log(error)
                 setIsLoading(false)
+                toast({
+                    title: "Erro ao buscar as faturas",
+                    description: error.message,
+                    variant: "destructive",
+                })
             }
         )
     }

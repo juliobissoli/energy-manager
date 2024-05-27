@@ -9,8 +9,8 @@ import moment from "moment";
 
 
 class InvoiceController {
-    private invoiceRepository: InvoiceRepository;
-    private installationRepository: InstallationModel;
+    public invoiceRepository: InvoiceRepository;
+    public installationRepository: InstallationModel;
     constructor() {
         this.invoiceRepository = new InvoiceModel();
         this.installationRepository = new InstallationModel();
@@ -64,7 +64,6 @@ class InvoiceController {
 
         const filePath = join(__dirname, '../../../invoices', `${invoice.installNumber}-${moment(dateRef).format('MM-YYYY')}.pdf`);
 
-        console.log('filePath =+=>>> ', filePath);
         const stream = createReadStream(filePath);
         const chunks: Buffer[] = [];
         for await (const chunk of stream) {

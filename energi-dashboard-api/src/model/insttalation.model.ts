@@ -5,7 +5,7 @@ class InstallationModel implements InstallationRepository {
     async create(installation: InstallationCreate): Promise<Installation> {
         const clientCreated = await prisma.installation.create({
             data: {
-                clientName: installation?.clientName || 'DefautName',
+                clientName: installation?.clientName || 'DefaultName',
                 number: installation.number,
                 clientNumber: installation?.clientNumber || '0',
             }
@@ -20,7 +20,6 @@ class InstallationModel implements InstallationRepository {
     }
 
     async findById(id: string): Promise<Installation | null> {
-        console.log('=========================', id);
         const installation = await prisma.installation.findUnique({
             where: {
                 id
@@ -38,6 +37,7 @@ class InstallationModel implements InstallationRepository {
         return client;
     }
 }
+
 
 export { InstallationModel }
 

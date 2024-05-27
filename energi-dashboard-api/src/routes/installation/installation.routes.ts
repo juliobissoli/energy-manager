@@ -1,6 +1,9 @@
 import { FastifyInstance } from "fastify";
-import { createInstallationDocs, InstallationCreate } from "../interfaces/installation.interface";
-import InstallationController from "../controller/installation/installation.cintroller";
+import { InstallationCreate } from "../../interfaces/installation.interface";
+import InstallationController from "../../controller/installation/installation.controller";
+import { createInstallationDocs, findAllDocs, findByIdDocs, findByNumberDocs } from "./installation.router.docs";
+
+
 
 
 export async function installationRoutes(fastify: FastifyInstance) {
@@ -17,9 +20,7 @@ export async function installationRoutes(fastify: FastifyInstance) {
         }
     });
 
-
-
-    fastify.get<{ Params: { id: string } }>('/:id', async (req, reply) => {
+    fastify.get<{ Params: { id: string } }>('/:id', findByIdDocs, async (req, reply) => {
         const installationController = new InstallationController();
         const { id } = req.params;
         try {
@@ -34,7 +35,7 @@ export async function installationRoutes(fastify: FastifyInstance) {
         }
     });
 
-    fastify.get<{ Params: { number: string } }>('/number/:number', async (req, reply) => {
+    fastify.get<{ Params: { number: string } }>('/number/:number', findByNumberDocs, async (req, reply) => {
         const installationController = new InstallationController();
         const { number } = req.params;
         try {
@@ -49,8 +50,7 @@ export async function installationRoutes(fastify: FastifyInstance) {
         }
     });
 
-
-    fastify.get('/', async (req, reply) => {
+    fastify.get('/', findAllDocs, async (req, reply) => {
         const installationController = new InstallationController();
         try {
             const installations = await installationController.findAll();
@@ -60,6 +60,4 @@ export async function installationRoutes(fastify: FastifyInstance) {
         }
     });
 
-
 }
-

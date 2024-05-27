@@ -20,7 +20,7 @@ export default function InstallationsList() {
 
     return (
         <AppLayout>
-            <h1 className="text-4xl py-2 border-b">Instalações</h1>
+            <h1 className="text-4xl py-2 border-b">Clientes</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
                 {installations.map((installation: Installation) => (

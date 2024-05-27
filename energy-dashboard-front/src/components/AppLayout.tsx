@@ -8,7 +8,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
     const { pathname } = useLocation();
     const routers = [
         { name: "Dashboard", path: "/", icon: <Rocket size={14} /> },
-        { name: "Instalações", path: "/installations", icon: <SquareActivity size={14} /> },
+        { name: "Clientes", path: "/installations", icon: <SquareActivity size={14} /> },
         { name: "Faturas", path: "/invoices", icon: <FileText size={14} /> },
     ]
     return (
@@ -38,9 +38,6 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
                                         </li>
                                     ))
                                 }
-                                {/* <li> <Link to="/"><Button variant="ghost" className={pathname === "/" ? "text-purple-500" : ""}>Dashboard</Button></Link></li>
-                                <li> <Link to="/installations"><Button variant="ghost" className={pathname === "/installations" ? "text-purple-500" : ""}>Instalações</Button></Link></li>
-                                <li> <Link to="/invoices"><Button variant="ghost" className={pathname === "/invoices" ? "text-purple-500" : ""}>Faturas</Button></Link></li> */}
                             </ul>
                         </div>
                         <ThemeToggle />

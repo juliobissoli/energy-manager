@@ -4,9 +4,14 @@
   "description": "",
   "main": "index.js",
   "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "test": "jest",
-    "dev": "tsx watch src/server.ts"
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "load:invoices": "node scripts/invoice-reader.js"
   },
   "author": "",
   "license": "ISC",

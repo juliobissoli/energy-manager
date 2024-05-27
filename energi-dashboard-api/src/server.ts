@@ -1,8 +1,8 @@
 import Fastify, { FastifyInstance } from "fastify"
 import cors from '@fastify/cors'
 
-import { invoiceRoutes } from "./routes/invoice.routes"
-import { installationRoutes } from "./routes/installation.routes"
+import { invoiceRoutes } from "./routes/invices/invoice.routes"
+import { installationRoutes } from "./routes/installation/installation.routes"
 
 
 import config from "./config"
@@ -44,7 +44,6 @@ app.listen(
     () => {
        console.log("Server is running in ", config.apiHost)
       console.log('Show API documentation in ', config.apiHost + '/docs')
-      console.log('============ > ', process.env.API_PORT)
       }
     )
 
